@@ -1,0 +1,4 @@
+{
+  "FileExtensionsToUpdate": [".go", "js"],
+  "RelativePathToDisclaimerCommentBlockTxt": "disclaimer_comment_block.txt"
+}
