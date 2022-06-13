@@ -16,23 +16,34 @@ type Configuration struct {
 func main() {
 	configuration, readErr := readConfig(configJsonPath)
 	if readErr != nil {
-		fmt.Println("Unable to read or decode config.json")
+		fmt.Printf("Unable to read or decode %s", configJsonPath)
 		return
 	}
 
-	fmt.Println(configuration.FileExtensionsToUpdate)
 	fmt.Println(configuration.RelativePathToDisclaimerCommentBlockTxt)
+	commentBlock, commentBlockError := readCommentBlock(configuration.RelativePathToDisclaimerCommentBlockTxt)
+	if commentBlockError != nil {
+		fmt.Printf("Unable to read comment block from %s", configuration.RelativePathToDisclaimerCommentBlockTxt)
+		return
+	}
+	fmt.Println(commentBlock)
+
+	fmt.Println(configuration.FileExtensionsToUpdate)
 }
 
 func readConfig(configJsonPath string) (*Configuration, error) {
 	file, err := os.Open(configJsonPath)
 
 	if err != nil {
-		fmt.Println("Failed to Open() config.json")
 		return nil, err
 	}
 
-	defer file.Close()
+	defer func() {
+		closeError := file.Close()
+		if err == nil {
+			err = closeError
+		}
+	}()
 
 	decoder := json.NewDecoder(file)
 
@@ -40,9 +51,18 @@ func readConfig(configJsonPath string) (*Configuration, error) {
 	err = decoder.Decode(&configuration)
 
 	if err != nil {
-		fmt.Println("Failed to Decode() configuration file")
 		return nil, err
 	}
 
 	return &configuration, err
+}
+
+func readCommentBlock(pathToDisclaimerCommentBlock string) (string, error) {
+	fileBytes, err := os.ReadFile(pathToDisclaimerCommentBlock)
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(fileBytes), err
 }
