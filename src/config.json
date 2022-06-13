@@ -1,4 +1,5 @@
 {
-  "FileExtensionsToUpdate": [".go", "js"],
-  "RelativePathToDisclaimerCommentBlockTxt": "src/disclaimer_comment_block.txt"
+  "RelativePathToDisclaimerCommentBlockTxt": "src/disclaimer_comment_block.txt",
+  "RelativeRootDirectoryOfFilesToUpdate": "src/",
+  "FileExtensionsToUpdate": [".go", "js"]
 }
