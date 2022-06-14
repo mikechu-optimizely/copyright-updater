@@ -1,5 +1,13 @@
 {
-  "RelativePathToDisclaimerCommentBlockTxt": "src/disclaimer_comment_block.txt",
-  "RelativeRootDirectoryOfFilesToUpdate": "src/",
-  "FileExtensionsToUpdate": [".go", "js"]
+  "RootDirectoryToSearch": "testfiles/",
+  "ExtensionsAndBlocks": [
+    {
+      "FileExtension": ".js",
+      "CommentBlockPath": "src/comment_block_go_js.txt"
+    },
+    {
+      "FileExtension": "go",
+      "CommentBlockPath": "src/comment_block_go_js.txt"
+    }
+  ]
 }
