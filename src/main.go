@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -25,7 +24,7 @@ type Configuration struct {
 	ExtensionCommentBlockMap map[string]string
 }
 
-var wg = sync.WaitGroup{}
+//var wg = sync.WaitGroup{}
 var config Configuration
 
 func main() {
@@ -42,7 +41,7 @@ func main() {
 		return
 	}
 
-	wg.Wait()
+	//wg.Wait()
 }
 
 func readConfig() error {
@@ -108,7 +107,7 @@ func updateFiles(rootPath string) error {
 			}
 
 			filePath := rootPath + d.Name()
-			file, err := os.Open(filePath)
+			file, err := os.OpenFile(filePath, os.O_RDWR, 0775)
 			if err != nil {
 				fmt.Printf("Unable to Open() %s\n", filePath)
 				return err
@@ -121,14 +120,15 @@ func updateFiles(rootPath string) error {
 				}
 			}()
 
-			wg.Add(1)
-			go updateFile(file, commentBlock)
+			//wg.Add(1)
+			/*go*/
+			updateFile(file, commentBlock)
 
 			return nil
 		},
 	)
 	if err != nil {
-		panic("Error while updating files")
+		return err
 	}
 
 	return nil
@@ -137,7 +137,7 @@ func updateFiles(rootPath string) error {
 func updateFile(fileToUpdate *os.File, commentBlock string) {
 	tryRemoveExistingDisclaimer(fileToUpdate)
 	addDisclaimer(fileToUpdate, commentBlock)
-	wg.Done()
+	//wg.Done()
 }
 
 func tryRemoveExistingDisclaimer(fileToUpdate *os.File) {
@@ -146,7 +146,10 @@ func tryRemoveExistingDisclaimer(fileToUpdate *os.File) {
 }
 
 func addDisclaimer(fileToUpdate *os.File, commentBlock string) {
-	time.Sleep(2 * time.Second) // simulating
+	_, err := fileToUpdate.WriteAt([]byte(commentBlock), 0)
+	if err != nil {
+		panic(fmt.Sprintf("Error while adding disclaimer to %s\n%s", fileToUpdate.Name(), err.Error()))
+	}
+
 	fmt.Printf("Added disclaimer to %s\n", fileToUpdate.Name())
-	fmt.Println(commentBlock)
 }
