@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"source"
@@ -91,26 +90,25 @@ func processExtensionBlocks() {
 }
 
 func updateFiles(rootPath string) error {
-	err := filepath.WalkDir(
+	err := filepath.Walk(
 		rootPath,
-		func(path string, d fs.DirEntry, err error) error {
+		func(path string, fileInfo os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
 
-			if d.IsDir() {
+			if fileInfo.IsDir() {
 				return nil
 			}
 
-			commentBlock := config.ExtensionCommentBlockMap[filepath.Ext(d.Name())]
+			commentBlock := config.ExtensionCommentBlockMap[filepath.Ext(fileInfo.Name())]
 			if commentBlock == "" {
 				return nil
 			}
 
-			filePath := rootPath + d.Name()
-			file, err := os.OpenFile(filePath, os.O_RDWR, 0775)
+			file, err := os.OpenFile(path, os.O_RDWR, 0600)
 			if err != nil {
-				fmt.Printf("Unable to Open() %s\n", filePath)
+				fmt.Printf("Unable to open %s\n", path)
 				return err
 			}
 
@@ -136,12 +134,15 @@ func updateFiles(rootPath string) error {
 }
 
 func updateFile(fileToUpdate *os.File, commentBlock string) {
+	codeFile := source.NewCodeFile(fileToUpdate.Name())
+
 	tryRemoveExistingDisclaimer(fileToUpdate)
 
-	err := source.NewCodeFile(fileToUpdate.Name()).Prepend(commentBlock)
+	err := codeFile.Prepend(commentBlock)
 	if err != nil {
 		panic(fmt.Sprintf("Error while adding disclaimer to %s\n%s", fileToUpdate.Name(), err.Error()))
 	}
+	fmt.Printf("Added comment block to %s\n", fileToUpdate.Name())
 
 	//wg.Done()
 }
