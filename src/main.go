@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"source"
 	"strings"
 	"time"
 )
@@ -136,20 +137,16 @@ func updateFiles(rootPath string) error {
 
 func updateFile(fileToUpdate *os.File, commentBlock string) {
 	tryRemoveExistingDisclaimer(fileToUpdate)
-	addDisclaimer(fileToUpdate, commentBlock)
+
+	err := source.NewCodeFile(fileToUpdate.Name()).Prepend(commentBlock)
+	if err != nil {
+		panic(fmt.Sprintf("Error while adding disclaimer to %s\n%s", fileToUpdate.Name(), err.Error()))
+	}
+
 	//wg.Done()
 }
 
 func tryRemoveExistingDisclaimer(fileToUpdate *os.File) {
 	time.Sleep(1 * time.Second) // simulating
 	fmt.Printf("Removed disclaimer from %s\n", fileToUpdate.Name())
-}
-
-func addDisclaimer(fileToUpdate *os.File, commentBlock string) {
-	_, err := fileToUpdate.WriteAt([]byte(commentBlock), 0)
-	if err != nil {
-		panic(fmt.Sprintf("Error while adding disclaimer to %s\n%s", fileToUpdate.Name(), err.Error()))
-	}
-
-	fmt.Printf("Added disclaimer to %s\n", fileToUpdate.Name())
 }
