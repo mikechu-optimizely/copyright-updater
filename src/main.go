@@ -73,7 +73,7 @@ func processExtensionBlocks() {
 	for _, extensionAndBlock := range config.ExtensionsAndBlocks {
 		// normalize the malformed extensions from config
 		if !strings.HasPrefix(extensionAndBlock.FileExtension, ".") {
-			extensionAndBlock.FileExtension += "."
+			extensionAndBlock.FileExtension = "." + extensionAndBlock.FileExtension
 		}
 
 		// read the comment block file
@@ -81,7 +81,7 @@ func processExtensionBlocks() {
 		if err != nil {
 			panic(fmt.Sprintf("Unable to read comment block from %s", extensionAndBlock.CommentBlockPath))
 		}
-		extensionAndBlock.CommentBlockText = string(fileBytes)
+		extensionAndBlock.CommentBlockText = strings.TrimSuffix(string(fileBytes), "\n")
 
 		if config.ExtensionCommentBlockMap == nil {
 			config.ExtensionCommentBlockMap = make(map[string]ExtensionAndBlock)

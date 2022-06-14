@@ -1,3 +1,4 @@
+// Jetbrains removes an empty line 1
 /*
  * This comment won't be replaced since it does not start line 1
  */
