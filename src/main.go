@@ -7,21 +7,22 @@ import (
 	"path/filepath"
 	"source"
 	"strings"
-	"time"
 )
 
 const configJsonPath = "src/config.json"
 
 type ExtensionAndBlock struct {
-	FileExtension    string
-	CommentBlockPath string
-	CommentBlockText string
+	FileExtension          string
+	CommentBlockPath       string
+	CommentBlockText       string
+	CommentBlockStartsWith string
+	CommentBlockEndsWith   string
 }
 
 type Configuration struct {
 	RootDirectoryToSearch    string
 	ExtensionsAndBlocks      []ExtensionAndBlock
-	ExtensionCommentBlockMap map[string]string
+	ExtensionCommentBlockMap map[string]ExtensionAndBlock
 }
 
 //var wg = sync.WaitGroup{}
@@ -70,10 +71,9 @@ func readConfig() error {
 
 func processExtensionBlocks() {
 	for _, extensionAndBlock := range config.ExtensionsAndBlocks {
-		extension := extensionAndBlock.FileExtension
 		// normalize the malformed extensions from config
-		if !strings.HasPrefix(extension, ".") {
-			extension = "." + extension
+		if !strings.HasPrefix(extensionAndBlock.FileExtension, ".") {
+			extensionAndBlock.FileExtension += "."
 		}
 
 		// read the comment block file
@@ -81,11 +81,12 @@ func processExtensionBlocks() {
 		if err != nil {
 			panic(fmt.Sprintf("Unable to read comment block from %s", extensionAndBlock.CommentBlockPath))
 		}
+		extensionAndBlock.CommentBlockText = string(fileBytes)
 
 		if config.ExtensionCommentBlockMap == nil {
-			config.ExtensionCommentBlockMap = make(map[string]string)
+			config.ExtensionCommentBlockMap = make(map[string]ExtensionAndBlock)
 		}
-		config.ExtensionCommentBlockMap[extension] = string(fileBytes)
+		config.ExtensionCommentBlockMap[extensionAndBlock.FileExtension] = extensionAndBlock
 	}
 }
 
@@ -101,8 +102,8 @@ func updateFiles(rootPath string) error {
 				return nil
 			}
 
-			commentBlock := config.ExtensionCommentBlockMap[filepath.Ext(fileInfo.Name())]
-			if commentBlock == "" {
+			configBlock := config.ExtensionCommentBlockMap[filepath.Ext(fileInfo.Name())]
+			if configBlock.CommentBlockText == "" {
 				return nil
 			}
 
@@ -121,7 +122,7 @@ func updateFiles(rootPath string) error {
 
 			//wg.Add(1)
 			/*go*/
-			updateFile(file, commentBlock)
+			updateFile(file, configBlock)
 
 			return nil
 		},
@@ -133,21 +134,19 @@ func updateFiles(rootPath string) error {
 	return nil
 }
 
-func updateFile(fileToUpdate *os.File, commentBlock string) {
+func updateFile(fileToUpdate *os.File, blockConfig ExtensionAndBlock) {
 	codeFile := source.NewCodeFile(fileToUpdate.Name())
 
-	tryRemoveExistingDisclaimer(fileToUpdate)
+	err := codeFile.RemoveFirstCommentBlock(blockConfig.CommentBlockStartsWith, blockConfig.CommentBlockEndsWith)
+	if err != nil {
+		panic(fmt.Sprintf("Error while removing disclaimer to %s\n%s", fileToUpdate.Name(), err.Error()))
+	}
 
-	err := codeFile.Prepend(commentBlock)
+	err = codeFile.Prepend(blockConfig.CommentBlockText)
 	if err != nil {
 		panic(fmt.Sprintf("Error while adding disclaimer to %s\n%s", fileToUpdate.Name(), err.Error()))
 	}
 	fmt.Printf("Added comment block to %s\n", fileToUpdate.Name())
 
 	//wg.Done()
-}
-
-func tryRemoveExistingDisclaimer(fileToUpdate *os.File) {
-	time.Sleep(1 * time.Second) // simulating
-	fmt.Printf("Removed disclaimer from %s\n", fileToUpdate.Name())
 }

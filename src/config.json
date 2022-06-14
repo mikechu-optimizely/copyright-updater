@@ -3,15 +3,21 @@
   "ExtensionsAndBlocks": [
     {
       "FileExtension": ".js",
-      "CommentBlockPath": "src/comment_block_go_js.txt"
+      "CommentBlockPath": "src/comment_block_go_js.txt",
+      "CommentBlockStartsWith": "/*",
+      "CommentBlockEndsWith": "*/"
     },
     {
       "FileExtension": "go",
-      "CommentBlockPath": "src/comment_block_go_js.txt"
+      "CommentBlockPath": "src/comment_block_go_js.txt",
+      "CommentBlockStartsWith": "/*",
+      "CommentBlockEndsWith": "*/"
     },
     {
       "FileExtension": ".html",
-      "CommentBlockPath": "src/comment_block_html.txt"
+      "CommentBlockPath": "src/comment_block_html.txt",
+      "CommentBlockStartsWith": "<!--",
+      "CommentBlockEndsWith": "-->"
     }
   ]
 }
