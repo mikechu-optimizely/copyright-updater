@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"source"
 	"strings"
+	"time"
 )
 
 const configJsonPath = "src/config.json"
@@ -29,6 +30,8 @@ type Configuration struct {
 var config Configuration
 
 func main() {
+	start := time.Now()
+
 	readErr := readConfig()
 	if readErr != nil {
 		return
@@ -43,6 +46,10 @@ func main() {
 	}
 
 	//wg.Wait()
+	elapsed := time.Since(start)
+
+	fmt.Println("***")
+	fmt.Printf("Updating files took: %s", elapsed)
 }
 
 func readConfig() error {
@@ -121,7 +128,7 @@ func updateFiles(rootPath string) error {
 			}()
 
 			//wg.Add(1)
-			/*go*/
+			//go updateFile(file, configBlock)
 			updateFile(file, configBlock)
 
 			return nil
