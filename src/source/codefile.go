@@ -37,9 +37,8 @@ func (r *CodeFile) readLines() error {
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		if tmp := scanner.Text(); len(tmp) != 0 {
-			r.Contents = append(r.Contents, tmp)
-		}
+		tmp := scanner.Text()
+		r.Contents = append(r.Contents, tmp)
 	}
 
 	return nil
