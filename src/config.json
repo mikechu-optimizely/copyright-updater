@@ -8,6 +8,10 @@
     {
       "FileExtension": "go",
       "CommentBlockPath": "src/comment_block_go_js.txt"
+    },
+    {
+      "FileExtension": ".html",
+      "CommentBlockPath": "src/comment_block_html.txt"
     }
   ]
 }
